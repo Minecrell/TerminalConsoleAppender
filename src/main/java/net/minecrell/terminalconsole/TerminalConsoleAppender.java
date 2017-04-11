@@ -60,12 +60,12 @@ import javax.annotation.Nullable;
  * removed. Consequently, it is necessary to keep an unused {@code Console}
  * appender.</p>
  *
- * <p><b>Example usage:</b>
+ * <p><b>Example usage:</b></p>
  * <pre>{@code  <TerminalConsole>
  *     <PatternLayout pattern="[%d{HH:mm:ss} %level]: %msg%n"/>
  * </TerminalConsole>
  *
- * <Console name="SysOut" target="SYSTEM_OUT"/>}</pre></p>
+ * <Console name="SysOut" target="SYSTEM_OUT"/>}</pre>
  *
  * <p>To use the enhanced console input it is necessary to set the
  * {@link LineReader} using {@link #setReader(LineReader)}. The appender will
