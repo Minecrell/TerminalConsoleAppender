@@ -1,10 +1,10 @@
 plugins {
     id 'java'
+    id 'maven'
     id 'net.minecrell.licenser' version '0.3'
 }
 
-group = 'net.minecrell'
-version = '1.0.0-SNAPSHOT'
+archivesBaseName = name.toLowerCase()
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -34,4 +34,55 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourceJar
     archives javadocJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            if (project.hasProperty('releaseRepo')) {
+                repository(url: releaseRepo) {
+                    if (project.hasProperty('mavenUser')) {
+                        authentication(userName: mavenUser, password: mavenPassword)
+                    }
+                }
+            }
+
+            if (project.hasProperty('snapshotRepo')) {
+                snapshotRepository(url: snapshotRepo) {
+                    if (project.hasProperty('mavenUser')) {
+                        authentication(userName: mavenUser, password: mavenPassword)
+                    }
+                }
+            }
+
+            pom {
+                artifactId = project.archivesBaseName
+
+                project {
+                    name = project.name
+                    description = project.description
+                    url = project.url
+
+                    scm {
+                        url = project.url
+                        connection = "scm:git:${project.url}.git"
+                        developerConnection = "scm:git:${project.url}.git"
+                    }
+
+                    issueManagement {
+                        system = 'GitHub Issues'
+                        url = "${project.url}/issues"
+                    }
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'http://opensource.org/licenses/MIT'
+                            distribution = 'repo'
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
