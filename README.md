@@ -66,7 +66,7 @@ if (terminal != null) {
     } catch (UserInterruptException e) {
         // Called when CTRL + C is typed
         // TODO: You should stop your app here
-
+    } finally {
         // Note: At this point the `LineReader` is no longer readable
         // The appender isn't aware of this so you should remove it manually to avoid errors
         TerminalConsoleAppender.setReader(null);
