@@ -149,7 +149,10 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
             next = s.indexOf(COLOR_CHAR, next);
         } while (next != -1 && next < last);
 
-        result.append(s, pos, s.length()).append(ANSI_RESET);
+        result.append(s, pos, s.length());
+        if (ansi) {
+            result.append(ANSI_RESET);
+        }
     }
 
     /**
