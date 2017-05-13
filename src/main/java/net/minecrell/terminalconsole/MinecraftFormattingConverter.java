@@ -61,7 +61,7 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
     private static final String ANSI_RESET = "\u001B[39;0m";
 
     private static final char COLOR_CHAR = '§';
-    private static final String LOOKUP = "0123456789abcdefklmor";
+    private static final String LOOKUP = "0123456789abcdefklmnor";
 
     private static final String[] ansiCodes = new String[] {
             "\u001B[0;30;22m", // Black §0
