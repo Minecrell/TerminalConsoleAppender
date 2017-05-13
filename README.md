@@ -74,7 +74,7 @@ if (terminal != null) {
 
 } else {
     // JLine isn't enabled or not supported
-    // TODO: Usually, you should fall back to reading from standard output here
+    // TODO: Usually, you should fall back to reading from standard input here
 }
 ```
 
