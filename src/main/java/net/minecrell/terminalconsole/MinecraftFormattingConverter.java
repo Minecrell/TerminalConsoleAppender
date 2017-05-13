@@ -174,7 +174,7 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
 
         PatternParser parser = PatternLayout.createPatternParser(config);
         List<PatternFormatter> formatters = parser.parse(options[0]);
-        boolean strip = options.length > 1 && "strip".equals(options[2]);
+        boolean strip = options.length > 1 && "strip".equals(options[1]);
         return new MinecraftFormattingConverter(formatters, strip);
     }
 
