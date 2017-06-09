@@ -47,6 +47,9 @@ import java.util.List;
  * warnings with a yellow color. It can be only used together with
  * {@link TerminalConsoleAppender}.</p>
  *
+ * <p>{@link TerminalConsoleAppender#ANSI_OVERRIDE_PROPERTY} may be used
+ * to force the use of ANSI colors even in unsupported environments.</p>
+ *
  * <p><b>Example usage:</b> {@code %highlightError{%level: %message}}</p>
  */
 @Plugin(name = "highlightError", category = PatternConverter.CATEGORY)
@@ -72,7 +75,7 @@ public class HighlightErrorConverter extends LogEventPatternConverter {
 
     @Override
     public void format(LogEvent event, StringBuilder toAppendTo) {
-        if (TerminalConsoleAppender.getTerminal() != null) {
+        if (TerminalConsoleAppender.isAnsiSupported()) {
             Level level = event.getLevel();
             if (level.isMoreSpecificThan(Level.ERROR)) {
                 format(ANSI_ERROR, event, toAppendTo);

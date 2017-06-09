@@ -33,6 +33,7 @@ import org.apache.logging.log4j.core.pattern.PatternConverter;
 import org.apache.logging.log4j.core.pattern.PatternFormatter;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import org.apache.logging.log4j.util.PerformanceSensitive;
+import org.apache.logging.log4j.util.PropertiesUtil;
 
 import java.util.List;
 
@@ -46,6 +47,11 @@ import java.util.List;
  * color output. When running in an unsupported environment, it will
  * automatically strip all formatting codes instead.</p>
  *
+ * <p>{@link TerminalConsoleAppender#ANSI_OVERRIDE_PROPERTY} may be used
+ * to force the use of ANSI colors even in unsupported environments. As an
+ * alternative, {@link #KEEP_FORMATTING_PROPERTY} may be used to keep the
+ * raw Minecraft formatting codes.</p>
+ *
  * <p><b>Example usage:</b> {@code %minecraftFormatting{%message}}<br>
  * It can be configured to always strip formatting codes from the message:
  * {@code %minecraftFormatting{%message}{strip}}</p>
@@ -57,6 +63,20 @@ import java.util.List;
 @ConverterKeys({ "minecraftFormatting" })
 @PerformanceSensitive("allocation")
 public class MinecraftFormattingConverter extends LogEventPatternConverter {
+
+    /**
+     * System property that allows disabling the replacement of Minecraft
+     * formatting codes entirely, keeping them in the console output. For
+     * some applications they might be easier and more accurate for parsing
+     * in applications like certain control panels.
+     *
+     * <p>If this system property is not set, or set to any value except
+     * {@code true}, all Minecraft formatting codes will be replaced
+     * or stripped from the console output.</p>
+     */
+    public static final String KEEP_FORMATTING_PROPERTY = TerminalConsoleAppender.PROPERTY_PREFIX + ".keepMinecraftFormatting";
+
+    private static final boolean KEEP_FORMATTING = PropertiesUtil.getProperties().getBooleanProperty(KEEP_FORMATTING_PROPERTY);
 
     private static final String ANSI_RESET = "\u001B[39;0m";
 
@@ -111,13 +131,13 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
             formatters.get(i).format(event, toAppendTo);
         }
 
-        if (toAppendTo.length() == start) {
-            // Content is empty
+        if (KEEP_FORMATTING || toAppendTo.length() == start) {
+            // Skip replacement if disabled or if the content is empty
             return;
         }
 
         String content = toAppendTo.substring(start);
-        format(content, toAppendTo, start, ansi && TerminalConsoleAppender.getTerminal() != null);
+        format(content, toAppendTo, start, ansi && TerminalConsoleAppender.isAnsiSupported());
     }
 
     private static void format(String s, StringBuilder result, int start, boolean ansi) {

@@ -42,14 +42,16 @@ import org.jline.terminal.TerminalBuilder;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
 /**
- * An {@link Appender} that uses the jline3 {@link Terminal} to print messages
+ * An {@link Appender} that uses the JLine 3.x {@link Terminal} to print messages
  * to the console.
  *
- * <p>The jline {@link Terminal} extends the regular console output with support
+ * <p>The JLine {@link Terminal} extends the regular console output with support
  * for Ansi escape codes on Windows. Additionally, it's {@link LineReader}
  * interface can be used to implement enhanced console input, with an
  * persistent input line, as well as command history and command completion.</p>
@@ -75,18 +77,66 @@ import javax.annotation.Nullable;
  * be removed from the appender as soon as it's no longer accepting
  * input (for example when the user interrupted input using CTRL + C.</p>
  *
- * <p>By default, the jline {@link Terminal} is enabled for all environments.
- * This may cause problems when running the project in environments which do
- * not support special features like Ansi escape codes. In these cases, you
- * can manually disable the jline terminal by setting {@code jline.enable}
- * system property to {@code false}.</p>
+ * <p>By default, the JLine {@link Terminal} is enabled when the application
+ * is started with an attached terminal session. Usually, this is only the
+ * case if the application is started from the command line, not if it gets
+ * started by another application.</p>
+ *
+ * <p>In some cases, it might be possible to support a subset of the features
+ * in these unsupported environments (e.g. only ANSI color codes). In these
+ * cases, the system properties may be used to override the default behaviour:
+ *
+ * <ul>
+ *     <li>{@link #JLINE_OVERRIDE_PROPERTY} - To enable the extended JLine
+ *     input. By default this will also enable the ANSI escape codes.</li>
+ *     <li>{@link #ANSI_OVERRIDE_PROPERTY} - To enable the output of ANSI
+ *     escape codes. May be used to force the use of ANSI escape codes
+ *     if JLine is disabled or to disable them if it is enabled.</li>
+ * </ul>
+ * </p>
  */
 @Plugin(name = TerminalConsoleAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
 public class TerminalConsoleAppender extends AbstractAppender {
 
     public static final String PLUGIN_NAME = "TerminalConsole";
 
-    private static final PrintStream out = System.out;
+    /**
+     * The prefix used for all system properties in TerminalConsoleAppender.
+     */
+    static final String PROPERTY_PREFIX = "terminal";
+
+    /**
+     * System property that allows overriding the default detection of the
+     * console to force enable or force disable the use of JLine. In some
+     * environments the automatic detection might not work properly.
+     *
+     * <p>If this system property is not set, or set to an invalid value
+     * (neither {@code true} nor {@code false}) then we will attempt
+     * to detect the best option automatically.</p>
+     */
+    public static final String JLINE_OVERRIDE_PROPERTY = PROPERTY_PREFIX + ".jline";
+
+    /**
+     * System property that allows overriding the use of ANSI escape codes
+     * for console formatting even though running in an unsupported
+     * environment. By default, ANSI color codes are only enabled if JLine
+     * is enabled. Some systems might be able to handle ANSI escape codes
+     * but are not capable of JLine's extended input mechanism.
+     *
+     * <p>If this system property is not set, or set to an invalid value
+     * (neither {@code true} nor {@code false}) then we will attempt
+     * to detect the best option automatically.</p>
+     */
+    public static final String ANSI_OVERRIDE_PROPERTY = PROPERTY_PREFIX + ".ansi";
+
+    private static final Boolean ANSI_OVERRIDE = getOptionalBooleanProperty(ANSI_OVERRIDE_PROPERTY);
+
+    /**
+     * We grab the standard output {@link PrintStream} early, otherwise we
+     * might cause infinite loops later if the application redirects
+     * {@link System#out} to Log4J.
+     */
+    private static final PrintStream stdout = System.out;
 
     private static boolean initialized;
     @Nullable private static Terminal terminal;
@@ -94,11 +144,12 @@ public class TerminalConsoleAppender extends AbstractAppender {
 
     /**
      * Returns the {@link Terminal} that is used to print messages to the
-     * console. May be {@code null} if forcibly disabled using the
-     * {@code jline.enable} system property or if running in an unsupported
-     * environment.
+     * console. Returns {@code null} in unsupported environments, unless
+     * overridden using the {@link #JLINE_OVERRIDE_PROPERTY} system
+     * property.
      *
      * @return The terminal, or null if not supported
+     * @see TerminalConsoleAppender
      */
     @Nullable
     public static Terminal getTerminal() {
@@ -136,6 +187,20 @@ public class TerminalConsoleAppender extends AbstractAppender {
     }
 
     /**
+     * Returns whether ANSI escapes codes should be written to the console
+     * output.
+     *
+     * <p>The return value is {@code true} by default if the JLine terminal
+     * is enabled and {@code false} otherwise. It may be overridden using
+     * the {@link #ANSI_OVERRIDE_PROPERTY} system property.</p>
+     *
+     * @return true if ANSI escapes codes should be written to the console
+     */
+    public static boolean isAnsiSupported() {
+        return ANSI_OVERRIDE != null ? ANSI_OVERRIDE : terminal != null;
+    }
+
+    /**
      * Constructs a new {@link TerminalConsoleAppender}.
      *
      * @param name The name of the appender
@@ -154,19 +219,41 @@ public class TerminalConsoleAppender extends AbstractAppender {
         if (!initialized) {
             initialized = true;
 
-            if (PropertiesUtil.getProperties().getBooleanProperty("jline.enable", true)
-                    && System.getProperty("FORGE_FORCE_FRAME_RECALC") == null) {
+            // A system property can be used to override our automatic detection
+            Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
+
+            // By default, we disable JLine if there is no terminal attached
+            // (e.g. if the program output is redirected to a file or if it's
+            // started by some kind of control panel)
+
+            // The same applies to IDEs, they usually provide only a very basic
+            // console implementation without support for ANSI escape codes
+            // (used for colors) or characters like \r.
+
+            // There are two exceptions:
+            //  1. IntelliJ IDEA supports colors and control characters
+            //     (We try to detect it using an additional JAR it adds to the classpath)
+            //  2. The system property forces the use of JLine.
+            boolean dumb = jlineOverride == Boolean.TRUE || System.getProperty("java.class.path").contains("idea_rt.jar");
+
+            if (jlineOverride != Boolean.FALSE) {
                 try {
-                    terminal = TerminalBuilder.builder().dumb(true).build();
+                    terminal = TerminalBuilder.builder().dumb(dumb).build();
+                } catch (IllegalStateException e) {
+                    // Unless disabled using one of the exceptions above,
+                    // JLine throws an exception before creating a dumb terminal
+                    // Dumb terminals are used if there is no real terminal attached
+                    // to the application.
+
+                    if (LOGGER.isDebugEnabled()) {
+                        // Log with stacktrace
+                        LOGGER.warn("Disabling terminal, you're running in an unsupported environment.", e);
+                    } else {
+                        LOGGER.warn("Disabling terminal, you're running in an unsupported environment.");
+                    }
                 } catch (IOException e) {
                     LOGGER.error("Failed to initialize terminal. Falling back to standard output", e);
                 }
-            } else {
-                // The property is set by ForgeGradle only for Eclipse.
-                // Eclipse doesn't support colors and characters like \r so enabling jline on it will
-                // just cause a lot of issues with empty lines and weird characters.
-                //      Also see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=76936
-                LOGGER.warn("Disabling terminal, you're running in an unsupported environment.");
             }
         }
     }
@@ -186,7 +273,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
 
             terminal.writer().flush();
         } else {
-            out.print(getLayout().toSerializable(event));
+            stdout.print(getLayout().toSerializable(event));
         }
     }
 
@@ -217,6 +304,22 @@ public class TerminalConsoleAppender extends AbstractAppender {
         }
 
         return new TerminalConsoleAppender(name, filter, layout, ignoreExceptions);
+    }
+
+    private static Boolean getOptionalBooleanProperty(String name) {
+        String value = PropertiesUtil.getProperties().getStringProperty(name);
+        if (value == null) {
+            return null;
+        }
+
+        if (value.equalsIgnoreCase("true")) {
+            return Boolean.TRUE;
+        } else if (value.equalsIgnoreCase("false"))  {
+            return Boolean.FALSE;
+        } else {
+            LOGGER.warn("Invalid value for boolean input property '{}': {}", name, value);
+            return null;
+        }
     }
 
 }

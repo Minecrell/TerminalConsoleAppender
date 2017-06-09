@@ -2,6 +2,22 @@
 TerminalConsoleAppender is a custom [Log4j2 Appender] that prints all messages to a [JLine 3 Terminal]. JLine can be
 used to extend the regular console using ANSI colors as well as command history or command completion.
 
+## Supported environments
+Not all environments can support all the features. By default, TerminalConsoleAppender only enables JLine output and
+console colors when running in an environment with an attached terminal session (so usually only when starting the
+application from an interactive console session). It will automatically disable the features if the console output is
+redirected to a file or to another application (e.g. in web control panels).
+
+Some unsupported environments may still support a subset of the features (e.g. ANSI console colors). In these cases,
+extra system properties exist to override the default behaviour. They can be added on the command line or in the
+application itself:
+
+| Name | Description |
+| ---- | ----------- |
+| `-Dterminal.jline=<true/false>` | Enables/disables the extended JLine input (persistent input line, command completion) |
+| `-Dterminal.ansi=<true/false>` | Enables/disables the output of ANSI escapes codes (used for colors) |
+| `-Dterminal.keepMinecraftFormatting=true` | Output raw Minecraft formatting codes to the console output. |
+
 ## Usage
 1. Add a dependency on TerminalConsoleAppender:
 
@@ -87,19 +103,6 @@ You can then set it using `.completer(Completer)` when building the `LineReader`
 
 ```java
 reader.unsetOpt(LineReader.Option.INSERT_TAB);
-```
-
-#### Usage in Eclipse
-Currently, Eclipse is unable to render control sequences such as `\r` (to reset the line) or ANSI escape codes.
-(See [Bug 76936](https://bugs.eclipse.org/bugs/show_bug.cgi?id=76936)). Unfortunately, after more than 12 years
-there is still no fix available.
-
-For now, the only solution is to disable JLine completely in Eclipse. You can instruct `TerminalConsoleAppender` to
-fall back to standard output by setting the `jline.enable` system property to `false`, e.g. by adding VM options to
-your run configuration:
-
-```
--Djline.enable=false
 ```
 
 ### Colorizing console output
