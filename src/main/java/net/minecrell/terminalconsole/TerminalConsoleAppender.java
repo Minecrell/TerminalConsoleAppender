@@ -137,7 +137,6 @@ public class TerminalConsoleAppender extends AbstractAppender {
     private static final PrintStream stdout = System.out;
 
     private static boolean initialized;
-    private static int instances;
     @Nullable private static Terminal terminal;
     @Nullable private static LineReader reader;
 
