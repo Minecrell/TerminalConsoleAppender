@@ -13,7 +13,7 @@ used to extend the regular console using ANSI colors as well as command history 
     `terminal-jna`:
 
     ```
-    org.jline:jline-terminal-jna:3.3.0
+    org.jline:jline-terminal-jna:3.3.1
     ```
 
 2. Configure `TerminalConsoleAppender` in your Log4j configuration:
