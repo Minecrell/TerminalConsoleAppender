@@ -42,8 +42,6 @@ import org.jline.terminal.TerminalBuilder;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -139,6 +137,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
     private static final PrintStream stdout = System.out;
 
     private static boolean initialized;
+    private static int instances;
     @Nullable private static Terminal terminal;
     @Nullable private static LineReader reader;
 
@@ -274,6 +273,25 @@ public class TerminalConsoleAppender extends AbstractAppender {
             terminal.writer().flush();
         } else {
             stdout.print(getLayout().toSerializable(event));
+        }
+    }
+
+    /**
+     * Closes the JLine {@link Terminal} (if available) and restores the original
+     * terminal settings.
+     *
+     * @throws IOException If an I/O error occurs
+     */
+    public static void close() throws IOException {
+        if (initialized) {
+            initialized = false;
+            if (terminal != null) {
+                try {
+                    terminal.close();
+                } finally {
+                    terminal = null;
+                }
+            }
         }
     }
 
