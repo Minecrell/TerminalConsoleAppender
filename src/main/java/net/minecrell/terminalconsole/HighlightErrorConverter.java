@@ -108,6 +108,16 @@ public class HighlightErrorConverter extends LogEventPatternConverter {
         }
     }
 
+    @Override
+    public boolean handlesThrowable() {
+        for (final PatternFormatter formatter : formatters) {
+            if (formatter.handlesThrowable()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Gets a new instance of the {@link HighlightErrorConverter} with the
      * specified options.
