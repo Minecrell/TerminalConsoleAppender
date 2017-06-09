@@ -83,6 +83,7 @@ import javax.annotation.Nullable;
  * <p>In some cases, it might be possible to support a subset of the features
  * in these unsupported environments (e.g. only ANSI color codes). In these
  * cases, the system properties may be used to override the default behaviour:
+ * </p>
  *
  * <ul>
  *     <li>{@link #JLINE_OVERRIDE_PROPERTY} - To enable the extended JLine
@@ -91,7 +92,6 @@ import javax.annotation.Nullable;
  *     escape codes. May be used to force the use of ANSI escape codes
  *     if JLine is disabled or to disable them if it is enabled.</li>
  * </ul>
- * </p>
  */
 @Plugin(name = TerminalConsoleAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
 public class TerminalConsoleAppender extends AbstractAppender {
