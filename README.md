@@ -112,7 +112,7 @@ To use them, you need to instruct Log4j to insert them into log messages:
 
   ```xml
   <TerminalConsole>
-      <PatternLayout noConsoleNoAnsi="true" pattern="%highlight{[%d{HH:mm:ss} %level]: %msg}%n"/>
+      <PatternLayout noConsoleNoAnsi="true" pattern="%highlight{[%d{HH:mm:ss} %level]: %msg%n%xEx}"/>
   </TerminalConsole>
   ```
 
@@ -122,7 +122,7 @@ To use them, you need to instruct Log4j to insert them into log messages:
 
   ```xml
   <TerminalConsole>
-      <PatternLayout pattern="%highlightError{[%d{HH:mm:ss} %level]: %msg}%n"/>
+      <PatternLayout pattern="%highlightError{[%d{HH:mm:ss} %level]: %msg%n%xEx}"/>
   </TerminalConsole>
   ```
 
