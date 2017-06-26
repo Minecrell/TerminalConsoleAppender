@@ -76,7 +76,22 @@ if (terminal != null) {
 
     try {
         String line;
-        while ((line = reader.readLine("> ")) != null) {
+
+        while (true) {
+            try {
+                line = reader.readLine("> ");
+            } catch (EndOfFileException ignored) {
+                // This is thrown when the user indicates end of input using CTRL + D
+                // For most applications it doesn't make sense to stop reading input
+                // You can either disable console input at this point, or just continue
+                // reading normally.
+                continue;
+            }
+
+            if (line == null) {
+                break;
+            }
+
             // TODO: Execute command with the line
         }
     } catch (UserInterruptException e) {
@@ -91,6 +106,12 @@ if (terminal != null) {
 } else {
     // JLine isn't enabled or not supported
     // TODO: Usually, you should fall back to reading from standard input here
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            // TODO: Execute command with the line
+        }
+    }
 }
 ```
 
