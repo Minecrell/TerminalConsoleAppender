@@ -25,8 +25,8 @@ application itself:
     net.minecrell:terminalconsoleappender:1.0.0
     ```
 
-    You also need one of the native terminal implementations of JLine 3 for the full set of features. I recommend using
-    `terminal-jna`:
+    JLine 3 provides different native terminal implementations that are required for Windows support and extend the terminal
+    with some advanced features on Linux. I recommend using the JNA implementation:
 
     ```
     org.jline:jline-terminal-jna:3.3.1
