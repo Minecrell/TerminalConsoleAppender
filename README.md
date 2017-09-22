@@ -29,7 +29,7 @@ application itself:
     with some advanced features on Linux. I recommend using the JNA implementation:
 
     ```
-    org.jline:jline-terminal-jna:3.4.0
+    org.jline:jline-terminal-jna:3.5.1
     ```
 
 2. Configure `TerminalConsoleAppender` in your Log4j configuration:
