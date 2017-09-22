@@ -26,11 +26,7 @@ application itself:
     ```
 
     JLine 3 provides different native terminal implementations that are required for Windows support and extend the terminal
-    with some advanced features on Linux. I recommend using the JNA implementation:
-
-    ```
-    org.jline:jline-terminal-jna:3.5.1
-    ```
+    with some advanced features on Linux. By default, TerminalConsoleAppender depends on the JNA terminal implementation.
 
 2. Configure `TerminalConsoleAppender` in your Log4j configuration:
 
@@ -50,7 +46,7 @@ application itself:
     org.jline:jline-reader
     ```
 
-    When using `jline-terminal-jna` additionally:
+    Unless you've chosen a different terminal implementation, you will also need:
 
     ```
     org.jline:jline-terminal-jna
