@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven'
+    id 'signing'
     id 'net.minecrell.licenser' version '0.3'
 }
 
@@ -35,22 +36,25 @@ artifacts {
     archives javadocJar
 }
 
+signing {
+    required { !version.endsWith('-SNAPSHOT') && gradle.taskGraph.hasTask(tasks.uploadArchives) }
+    sign configurations.archives
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
-            if (project.hasProperty('releaseRepo')) {
-                repository(url: releaseRepo) {
-                    if (project.hasProperty('mavenUser')) {
-                        authentication(userName: mavenUser, password: mavenPassword)
-                    }
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
             }
 
-            if (project.hasProperty('snapshotRepo')) {
-                snapshotRepository(url: snapshotRepo) {
-                    if (project.hasProperty('mavenUser')) {
-                        authentication(userName: mavenUser, password: mavenPassword)
-                    }
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
             }
 
@@ -71,6 +75,14 @@ uploadArchives {
                     issueManagement {
                         system = 'GitHub Issues'
                         url = "${project.url}/issues"
+                    }
+
+                    developers {
+                        developer {
+                            id = 'minecrell'
+                            name = 'Minecrell'
+                            email = 'dev@minecrell.net'
+                        }
                     }
 
                     licenses {
