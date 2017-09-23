@@ -33,6 +33,7 @@ import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.util.PropertiesUtil;
 import org.jline.reader.LineReader;
@@ -307,15 +308,11 @@ public class TerminalConsoleAppender extends AbstractAppender {
      */
     @PluginFactory
     public static TerminalConsoleAppender createAppender(
-            @PluginAttribute("name") String name,
+            @Required(message = "No name provided for TerminalConsoleAppender") @PluginAttribute("name") String name,
             @PluginElement("Filter") Filter filter,
             @PluginElement("Layout") @Nullable Layout<? extends Serializable> layout,
             @PluginAttribute(value = "ignoreExceptions", defaultBoolean = true) boolean ignoreExceptions) {
 
-        if (name == null) {
-            LOGGER.error("No name provided for TerminalConsoleAppender");
-            return null;
-        }
         if (layout == null) {
             layout = PatternLayout.createDefaultLayout();
         }
