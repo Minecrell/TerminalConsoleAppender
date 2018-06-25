@@ -65,7 +65,12 @@ if (terminal != null) {
     LineReader reader = LineReaderBuilder.builder()
         .appName("Example App") // TODO: Replace with your app name
         .terminal(terminal)
-        .build()
+        .build();
+    
+    // This disables JLine's implementation of Bash's Event Designators
+    // These usually don't behave as expected in a simple console session
+    // See https://github.com/PaperMC/Paper/issues/1171#issuecomment-399709202 for details
+    reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
 
     // Important to make the appender aware of the reader
     TerminalConsoleAppender.setReader(reader);
