@@ -68,9 +68,7 @@ import javax.annotation.Nullable;
  * {@link LineReader} using {@link #setReader(LineReader)}. The appender will
  * then automatically redraw the current prompt. When creating the
  * {@link LineReader} it's important to use the {@link Terminal}
- * returned by {@link #getTerminal()}. Additionally, the reader should
- * be removed from the appender as soon as it's no longer accepting
- * input (for example when the user interrupted input using CTRL + C.</p>
+ * returned by {@link #getTerminal()}.</p>
  *
  * <p>By default, the JLine {@link Terminal} is enabled when the application
  * is started with an attached terminal session. Usually, this is only the
@@ -147,7 +145,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      * @see TerminalConsoleAppender
      */
     @Nullable
-    public static Terminal getTerminal() {
+    public synchronized static Terminal getTerminal() {
         return terminal;
     }
 
@@ -159,7 +157,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      * @return The current line reader, or null if none
      */
     @Nullable
-    public static LineReader getReader() {
+    public synchronized static LineReader getReader() {
         return reader;
     }
 
@@ -173,7 +171,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      *
      * @param newReader The new line reader
      */
-    public static void setReader(@Nullable LineReader newReader) {
+    public synchronized static void setReader(@Nullable LineReader newReader) {
         if (newReader != null && newReader.getTerminal() != terminal) {
             throw new IllegalArgumentException("Reader was not created with TerminalConsoleAppender.getTerminal()");
         }
@@ -210,7 +208,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
         initializeTerminal();
     }
 
-    private static void initializeTerminal() {
+    private synchronized static void initializeTerminal() {
         if (!initialized) {
             initialized = true;
 
@@ -255,20 +253,20 @@ public class TerminalConsoleAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
+        print(getLayout().toSerializable(event).toString());
+    }
+
+    private synchronized static void print(String text) {
         if (terminal != null) {
             if (reader != null) {
                 // Draw the prompt line again if a reader is available
-                reader.callWidget(LineReader.CLEAR);
-                terminal.writer().print(getLayout().toSerializable(event));
-                reader.callWidget(LineReader.REDRAW_LINE);
-                reader.callWidget(LineReader.REDISPLAY);
+                reader.printAbove(text);
             } else {
-                terminal.writer().print(getLayout().toSerializable(event));
+                terminal.writer().print(text);
+                terminal.writer().flush();
             }
-
-            terminal.writer().flush();
         } else {
-            stdout.print(getLayout().toSerializable(event));
+            stdout.print(text);
         }
     }
 
@@ -278,9 +276,10 @@ public class TerminalConsoleAppender extends AbstractAppender {
      *
      * @throws IOException If an I/O error occurs
      */
-    public static void close() throws IOException {
+    public synchronized static void close() throws IOException {
         if (initialized) {
             initialized = false;
+            reader = null;
             if (terminal != null) {
                 try {
                     terminal.close();

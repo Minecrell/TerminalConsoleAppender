@@ -12,14 +12,18 @@ targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
+    maven {
+        name = 'sonatype-snapshots'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
 }
 
 dependencies {
     compile 'org.apache.logging.log4j:log4j-core:2.8.1'
     annotationProcessor 'org.apache.logging.log4j:log4j-core:2.8.1'
 
-    compile 'org.jline:jline-reader:3.5.1'
-    runtime 'org.jline:jline-terminal-jna:3.5.1'
+    compile 'org.jline:jline-reader:3.9.0-SNAPSHOT'
+    runtime 'org.jline:jline-terminal-jna:3.9.0-SNAPSHOT'
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }
