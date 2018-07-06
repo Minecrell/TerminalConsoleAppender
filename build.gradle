@@ -82,14 +82,14 @@ uploadArchives {
                         developer {
                             id = 'minecrell'
                             name = 'Minecrell'
-                            email = 'dev@minecrell.net'
+                            email = 'minecrell@minecrell.net'
                         }
                     }
 
                     licenses {
                         license {
                             name = 'MIT License'
-                            url = 'http://opensource.org/licenses/MIT'
+                            url = 'https://opensource.org/licenses/MIT'
                             distribution = 'repo'
                         }
                     }
