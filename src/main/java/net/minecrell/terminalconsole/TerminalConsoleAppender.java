@@ -55,17 +55,12 @@ import javax.annotation.Nullable;
  * persistent input line, as well as command history and command completion.</p>
  *
  * <p>The {@code TerminalConsole} appender replaces the default {@code Console}
- * appender in your log4j configuration. By default, log4j will automatically
- * close the standard output when the original {@code Console} appender is
- * removed. Consequently, it is necessary to keep an unused {@code Console}
- * appender.</p>
+ * appender in your log4j configuration.</p>
  *
  * <p><b>Example usage:</b></p>
  * <pre>{@code  <TerminalConsole>
  *     <PatternLayout pattern="[%d{HH:mm:ss} %level]: %msg%n"/>
- * </TerminalConsole>
- *
- * <Console name="SysOut" target="SYSTEM_OUT"/>}</pre>
+ * </TerminalConsole>}</pre>
  *
  * <p>To use the enhanced console input it is necessary to set the
  * {@link LineReader} using {@link #setReader(LineReader)}. The appender will
