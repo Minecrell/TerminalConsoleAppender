@@ -22,7 +22,7 @@ application itself:
 1. Add a dependency on TerminalConsoleAppender:
 
     ```
-    net.minecrell:terminalconsoleappender:1.0.0
+    net.minecrell:terminalconsoleappender:1.1.0
     ```
 
     JLine 3 provides different native terminal implementations that are required for Windows support and extend the terminal
@@ -37,6 +37,11 @@ application itself:
     ```
 
     The `TerminalConsole` appender replaces the regular `Console` appender in your configuration file.
+    
+    **Note:** To avoid JLine from blocking your application in some edge cases, it is recommended that you make use of
+    [Async Loggers](https://logging.apache.org/log4j/2.x/manual/async.html) or
+    [Async Appenders](https://logging.apache.org/log4j/2.x/manual/appenders.html#AsyncAppender) to write messages
+    asynchronously.
 
 3. That's it! To make it work at runtime you need to have the following dependencies available at runtime:
 
@@ -57,75 +62,59 @@ application itself:
 The appender is designed to be used in an application with simultaneous input and output. JLine can extend your console
 with a persistent input line as well as command history and command completion.
 
-Use the `LineReader` interface to read input from the console:
+TerminalConsoleAppender includes `SimpleTerminalConsole` as a base class handling console input
+with opinionated defaults. It also serves as a reference implementation if you would like to
+have a custom implementation.
+
+To use it, extend `SimpleTerminalConsole` and implement the methods:
 
 ```java
-Terminal terminal = TerminalConsoleAppender.getTerminal();
-if (terminal != null) {
-    LineReader reader = LineReaderBuilder.builder()
-        .appName("Example App") // TODO: Replace with your app name
-        .terminal(terminal)
-        .build();
+public class ExampleConsole extends SimpleTerminalConsole {
+
+    @Override
+    protected boolean isRunning() {
+        // TODO: Return true if your application is still running
+    }
+
+    @Override
+    protected void runCommand(String command) {
+        // TODO: Run command
+    }
+
+    @Override
+    protected void shutdown() {
+        // TODO: Shutdown your application cleanly (e.g. because CTRL+C was pressed)
+    }
     
-    // This disables JLine's implementation of Bash's Event Designators
-    // These usually don't behave as expected in a simple console session
-    // See https://github.com/PaperMC/Paper/issues/1171#issuecomment-399709202 for details
-    reader.setOpt(LineReader.Option.DISABLE_EVENT_EXPANSION);
-
-    // Important to make the appender aware of the reader
-    TerminalConsoleAppender.setReader(reader);
-
-    try {
-        String line;
-
-        while (true) {
-            try {
-                line = reader.readLine("> ");
-            } catch (EndOfFileException ignored) {
-                // This is thrown when the user indicates end of input using CTRL + D
-                // For most applications it doesn't make sense to stop reading input
-                // You can either disable console input at this point, or just continue
-                // reading normally.
-                continue;
-            }
-
-            if (line == null) {
-                break;
-            }
-
-            // TODO: Execute command with the line
-        }
-    } catch (UserInterruptException e) {
-        // Called when CTRL + C is typed
-        // TODO: You should stop your app here
-    } finally {
-        // Note: At this point the `LineReader` is no longer readable
-        // The appender isn't aware of this so you should remove it manually to avoid errors
-        TerminalConsoleAppender.setReader(null);
-    }
-
-} else {
-    // JLine isn't enabled or not supported
-    // TODO: Usually, you should fall back to reading from standard input here
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            // TODO: Execute command with the line
-        }
-    }
 }
+```
+
+You can then start reading commands. Note that this method won't return unless your application
+is stopping or an error occurred, so you should start it in a separate console thread.
+
+```java
+new ExampleConsole().start();
 ```
 
 This setup will automatically handle the persistent input line and command history for you. If you'd like to use
 command completion you need to implement JLine's `Completer` interface (or use one of the builtin completers).
 You can then set it using `.completer(Completer)` when building the `LineReader`.
 
-**Note:** If you'd like to allow tab completion with empty input you need to disable inserting raw tabs for the
-`LineReader`:
+Override the `buildReader` method in your `ExampleConsole` to set additional options:
 
 ```java
-reader.unsetOpt(LineReader.Option.INSERT_TAB);
+    @Override
+    protected LineReader buildReader(LineReaderBuilder builder) {
+        return super.buildReader(builder
+                .appName("Example") // TODO: Replace with your application name
+                .completer(new ExampleCommandCompleter())
+        );
+    }
 ```
+
+If you'd like to use a custom console input implementation, take a look at the
+[source code of `SimpleTerminalConsole`](https://github.com/Minecrell/TerminalConsoleAppender/blob/master/src/main/java/net/minecrell/terminalconsole/SimpleTerminalConsole.java)
+to see how it works (as the name says, it's pretty simple!).
 
 ### Colorizing console output
 JLine will automatically render ANSI color escape codes in supported terminals under Windows, Mac and Linux.
