@@ -22,7 +22,7 @@ application itself:
 1. Add a dependency on TerminalConsoleAppender:
 
     ```
-    net.minecrell:terminalconsoleappender:1.1.0
+    net.minecrell:terminalconsoleappender:1.1.1
     ```
 
     JLine 3 provides different native terminal implementations that are required for Windows support and extend the terminal
