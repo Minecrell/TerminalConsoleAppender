@@ -1,5 +1,4 @@
-sudo: false
-dist: trusty
+dist: xenial
 
 language: java
 jdk: openjdk8
@@ -7,7 +6,7 @@ jdk: openjdk8
 install: true
 script: ./gradlew build
 
-after_success: '[[ "$TRAVIS_BRANCH" = "master" ]] && ./gradlew uploadArchives'
+after_success: '[[ "$TRAVIS_BRANCH" = "master" ]] && ./gradlew publish'
 
 notifications:
   email: false
