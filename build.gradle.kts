@@ -25,6 +25,13 @@ dependencies {
     runtime("org.jline:jline-terminal-jna:3.10.0")
 
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.4.0")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 val sourceJar = task<Jar>("sourceJar") {
