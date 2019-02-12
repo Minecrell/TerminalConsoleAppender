@@ -151,14 +151,10 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
         result.setLength(start + next);
 
         int pos = next;
-        int format;
         do {
-            if (pos != next) {
-                result.append(s, pos, next);
-            }
-
-            format = LOOKUP.indexOf(Character.toLowerCase(s.charAt(next + 1)));
+            int format = LOOKUP.indexOf(Character.toLowerCase(s.charAt(next + 1)));
             if (format != -1) {
+                result.append(s, pos, next);
                 if (ansi) {
                     result.append(ansiCodes[format]);
                 }

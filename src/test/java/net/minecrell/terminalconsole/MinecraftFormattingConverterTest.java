@@ -59,6 +59,14 @@ public class MinecraftFormattingConverterTest {
     }
 
     @Test
+    public void replaceInvalid() {
+        assertEquals("§World" + ANSI_RESET, format("§World", true));
+        assertEquals("\u001B[0;31;1mHello §World!" + ANSI_RESET, format("§CHello §World!", true));
+        assertEquals("\u001B[0;31;1mHello §World, \u001B[0;33;22mMinecrell§\u001B[0;31;1m!" + ANSI_RESET,
+                format("§CHello §World, §6Minecrell§§c!", true));
+    }
+
+    @Test
     public void stripLiteral() {
         assertEquals("Hello World!", format("Hello World!", false));
     }
@@ -76,6 +84,13 @@ public class MinecraftFormattingConverterTest {
     @Test
     public void stripUppercase() {
         assertEquals("Hello World!", format("§CHello World!", false));
+    }
+
+    @Test
+    public void stripInvalid() {
+        assertEquals("§World", format("§World", false));
+        assertEquals("Hello §World!", format("§CHello §World!", false));
+        assertEquals("Hello §World, Minecrell§!", format("§CHello §World, §6Minecrell§§c!", false));
     }
 
 }
