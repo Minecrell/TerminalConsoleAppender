@@ -54,6 +54,11 @@ public class MinecraftFormattingConverterTest {
     }
 
     @Test
+    public void replaceUppercase() {
+        assertEquals("\u001B[0;31;1mHello World!" + ANSI_RESET, format("§CHello World!", true));
+    }
+
+    @Test
     public void stripLiteral() {
         assertEquals("Hello World!", format("Hello World!", false));
     }
@@ -66,6 +71,11 @@ public class MinecraftFormattingConverterTest {
     @Test
     public void stripMultiple() {
         assertEquals("abcabcHello World!", format("abcabc§cHello §9§lWorld!", false));
+    }
+
+    @Test
+    public void stripUppercase() {
+        assertEquals("Hello World!", format("§CHello World!", false));
     }
 
 }
