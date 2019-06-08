@@ -62,7 +62,7 @@ public class MinecraftFormattingConverterTest {
     public void replaceInvalid() {
         assertEquals("§World" + ANSI_RESET, format("§World", true));
         assertEquals("\u001B[0;31;1mHello §World!" + ANSI_RESET, format("§CHello §World!", true));
-        assertEquals("\u001B[0;31;1mHello §World, \u001B[0;33;22mMinecrell§\u001B[0;31;1m!" + ANSI_RESET,
+        assertEquals("\u001B[0;31;1mHello §World, \u001B[0;33mMinecrell§\u001B[0;31;1m!" + ANSI_RESET,
                 format("§CHello §World, §6Minecrell§§c!", true));
     }
 
