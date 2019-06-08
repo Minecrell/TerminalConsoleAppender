@@ -237,12 +237,12 @@ public class TerminalConsoleAppender extends AbstractAppender {
 
                     if (LOGGER.isDebugEnabled()) {
                         // Log with stacktrace
-                        LOGGER.warn("Disabling terminal, you're running in an unsupported environment.", e);
+                        LOGGER.warn("Advanced terminal features are not available in this environment", e);
                     } else {
-                        LOGGER.warn("Disabling terminal, you're running in an unsupported environment.");
+                        LOGGER.warn("Advanced terminal features are not available in this environment");
                     }
                 } catch (IOException e) {
-                    LOGGER.error("Failed to initialize terminal. Falling back to standard output", e);
+                    LOGGER.error("Failed to initialize terminal. Falling back to standard console", e);
                 }
             }
         }
