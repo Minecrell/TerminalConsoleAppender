@@ -57,7 +57,7 @@ import java.util.List;
 @Plugin(name = "highlightError", category = PatternConverter.CATEGORY)
 @ConverterKeys({ "highlightError" })
 @PerformanceSensitive("allocation")
-public class HighlightErrorConverter extends LogEventPatternConverter {
+public final class HighlightErrorConverter extends LogEventPatternConverter {
 
     private static final String ANSI_RESET = "\u001B[m";
     private static final String ANSI_ERROR = "\u001B[31;1m"; // Bold Red

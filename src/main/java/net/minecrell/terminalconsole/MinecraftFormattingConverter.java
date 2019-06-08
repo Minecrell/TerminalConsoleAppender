@@ -64,7 +64,7 @@ import java.util.List;
 @Plugin(name = "minecraftFormatting", category = PatternConverter.CATEGORY)
 @ConverterKeys({ "minecraftFormatting" })
 @PerformanceSensitive("allocation")
-public class MinecraftFormattingConverter extends LogEventPatternConverter {
+public final class MinecraftFormattingConverter extends LogEventPatternConverter {
 
     /**
      * System property that allows disabling the replacement of Minecraft

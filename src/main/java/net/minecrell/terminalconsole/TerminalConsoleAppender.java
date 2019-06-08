@@ -88,7 +88,7 @@ import java.io.Serializable;
  * </ul>
  */
 @Plugin(name = TerminalConsoleAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
-public class TerminalConsoleAppender extends AbstractAppender {
+public final class TerminalConsoleAppender extends AbstractAppender {
 
     public static final String PLUGIN_NAME = "TerminalConsole";
 

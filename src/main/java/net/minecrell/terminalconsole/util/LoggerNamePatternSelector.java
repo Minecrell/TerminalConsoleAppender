@@ -65,7 +65,7 @@ import java.util.List;
  */
 @Plugin(name = "LoggerNamePatternSelector", category = Node.CATEGORY, elementType = PatternSelector.ELEMENT_TYPE)
 @PerformanceSensitive("allocation")
-public class LoggerNamePatternSelector implements PatternSelector {
+public final class LoggerNamePatternSelector implements PatternSelector {
 
     private static class LoggerNameSelector {
 
