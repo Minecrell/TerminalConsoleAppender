@@ -35,6 +35,7 @@ import org.apache.logging.log4j.core.pattern.PatternFormatter;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import org.apache.logging.log4j.util.PerformanceSensitive;
 import org.apache.logging.log4j.util.PropertiesUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -184,7 +185,7 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
      *
      * @see MinecraftFormattingConverter
      */
-    public static MinecraftFormattingConverter newInstance(Configuration config, String[] options) {
+    public static @Nullable MinecraftFormattingConverter newInstance(Configuration config, String[] options) {
         if (options.length < 1 || options.length > 2) {
             LOGGER.error("Incorrect number of options on minecraftFormatting. Expected at least 1, max 2 received " + options.length);
             return null;

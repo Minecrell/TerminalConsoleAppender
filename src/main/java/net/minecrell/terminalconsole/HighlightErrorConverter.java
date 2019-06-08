@@ -36,6 +36,7 @@ import org.apache.logging.log4j.core.pattern.PatternConverter;
 import org.apache.logging.log4j.core.pattern.PatternFormatter;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import org.apache.logging.log4j.util.PerformanceSensitive;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -138,7 +139,7 @@ public class HighlightErrorConverter extends LogEventPatternConverter {
      * @param options The pattern options
      * @return The new instance
      */
-    public static HighlightErrorConverter newInstance(Configuration config, String[] options) {
+    public static @Nullable HighlightErrorConverter newInstance(Configuration config, String[] options) {
         if (options.length != 1) {
             LOGGER.error("Incorrect number of options on highlightError. Expected 1 received " + options.length);
             return null;

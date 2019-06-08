@@ -39,6 +39,7 @@ import org.apache.logging.log4j.core.layout.PatternSelector;
 import org.apache.logging.log4j.core.pattern.PatternFormatter;
 import org.apache.logging.log4j.core.pattern.PatternParser;
 import org.apache.logging.log4j.util.PerformanceSensitive;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,22 +107,21 @@ public class LoggerNamePatternSelector implements PatternSelector {
     protected LoggerNamePatternSelector(String defaultPattern, PatternMatch[] properties,
             boolean alwaysWriteExceptions, boolean disableAnsi, boolean noConsoleNoAnsi, Configuration config) {
         PatternParser parser = PatternLayout.createPatternParser(config);
-        this.defaultFormatters = toArray(parser.parse(defaultPattern, alwaysWriteExceptions, disableAnsi, noConsoleNoAnsi));
+        PatternFormatter[] emptyFormatters = new PatternFormatter[0];
+        this.defaultFormatters = parser.parse(defaultPattern, alwaysWriteExceptions, disableAnsi, noConsoleNoAnsi)
+                .toArray(emptyFormatters);
         for (PatternMatch property : properties) {
-            PatternFormatter[] formatters = toArray(parser.parse(property.getPattern(), alwaysWriteExceptions, disableAnsi, noConsoleNoAnsi));
+            PatternFormatter[] formatters = parser.parse(property.getPattern(), alwaysWriteExceptions, disableAnsi, noConsoleNoAnsi)
+                    .toArray(emptyFormatters);
             for (String name : property.getKey().split(",")) {
                 this.formatters.add(new LoggerNameSelector(name, formatters));
             }
         }
     }
 
-    private static PatternFormatter[] toArray(List<PatternFormatter> formatters) {
-        return formatters.toArray(new PatternFormatter[formatters.size()]);
-    }
-
     @Override
     public PatternFormatter[] getFormatters(LogEvent event) {
-        final String loggerName = event.getLoggerName();
+        final @Nullable String loggerName = event.getLoggerName();
         if (loggerName != null) {
             //noinspection ForLoopReplaceableByForEach
             for (int i = 0; i < this.formatters.size(); i++) {

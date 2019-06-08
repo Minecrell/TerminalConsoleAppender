@@ -24,7 +24,7 @@ dependencies {
     compile("org.jline:jline-reader:3.11.0")
     runtime("org.jline:jline-terminal-jna:3.11.0")
 
-    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    compileOnly("org.checkerframework:checker-qual:2.8.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.4.2")

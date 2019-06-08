@@ -37,6 +37,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.util.PropertiesUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -44,8 +45,6 @@ import org.jline.terminal.TerminalBuilder;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
-
-import javax.annotation.Nullable;
 
 /**
  * An {@link Appender} that uses the JLine 3.x {@link Terminal} to print messages
@@ -122,7 +121,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      */
     public static final String ANSI_OVERRIDE_PROPERTY = PROPERTY_PREFIX + ".ansi";
 
-    private static final Boolean ANSI_OVERRIDE = getOptionalBooleanProperty(ANSI_OVERRIDE_PROPERTY);
+    private static final @Nullable Boolean ANSI_OVERRIDE = getOptionalBooleanProperty(ANSI_OVERRIDE_PROPERTY);
 
     /**
      * We grab the standard output {@link PrintStream} early, otherwise we
@@ -132,8 +131,8 @@ public class TerminalConsoleAppender extends AbstractAppender {
     private static final PrintStream stdout = System.out;
 
     private static boolean initialized;
-    @Nullable private static Terminal terminal;
-    @Nullable private static LineReader reader;
+    private static @Nullable Terminal terminal;
+    private static @Nullable LineReader reader;
 
     /**
      * Returns the {@link Terminal} that is used to print messages to the
@@ -144,8 +143,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      * @return The terminal, or null if not supported
      * @see TerminalConsoleAppender
      */
-    @Nullable
-    public synchronized static Terminal getTerminal() {
+    public synchronized static @Nullable Terminal getTerminal() {
         return terminal;
     }
 
@@ -156,8 +154,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
      *
      * @return The current line reader, or null if none
      */
-    @Nullable
-    public synchronized static LineReader getReader() {
+    public synchronized static @Nullable LineReader getReader() {
         return reader;
     }
 
@@ -213,7 +210,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
             initialized = true;
 
             // A system property can be used to override our automatic detection
-            Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
+            @Nullable Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
 
             // By default, we disable JLine if there is no terminal attached
             // (e.g. if the program output is redirected to a file or if it's
@@ -315,7 +312,7 @@ public class TerminalConsoleAppender extends AbstractAppender {
         return new TerminalConsoleAppender(name, filter, layout, ignoreExceptions);
     }
 
-    private static Boolean getOptionalBooleanProperty(String name) {
+    private static @Nullable Boolean getOptionalBooleanProperty(String name) {
         String value = PropertiesUtil.getProperties().getStringProperty(name);
         if (value == null) {
             return null;

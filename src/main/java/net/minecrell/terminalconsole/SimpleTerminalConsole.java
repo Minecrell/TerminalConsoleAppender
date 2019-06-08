@@ -25,6 +25,7 @@
 package net.minecrell.terminalconsole;
 
 import org.apache.logging.log4j.LogManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -135,7 +136,7 @@ public abstract class SimpleTerminalConsole {
      */
     public void start() {
         try {
-            final Terminal terminal = TerminalConsoleAppender.getTerminal();
+            final @Nullable Terminal terminal = TerminalConsoleAppender.getTerminal();
             if (terminal != null) {
                 readCommands(terminal);
             } else {
