@@ -80,7 +80,7 @@ public class MinecraftFormattingConverter extends LogEventPatternConverter {
 
     private static final boolean KEEP_FORMATTING = PropertiesUtil.getProperties().getBooleanProperty(KEEP_FORMATTING_PROPERTY);
 
-    static final String ANSI_RESET = "\u001B[39;0m";
+    static final String ANSI_RESET = "\u001B[m";
 
     private static final char COLOR_CHAR = '§';
     private static final String LOOKUP = "0123456789abcdefklmnor";

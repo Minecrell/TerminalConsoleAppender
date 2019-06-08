@@ -59,9 +59,9 @@ import java.util.List;
 @PerformanceSensitive("allocation")
 public class HighlightErrorConverter extends LogEventPatternConverter {
 
-    private static final String ANSI_RESET = "\u001B[39;0m";
-    private static final String ANSI_ERROR = "\u001B[31;1m";
-    private static final String ANSI_WARN = "\u001B[33;1m";
+    private static final String ANSI_RESET = "\u001B[m";
+    private static final String ANSI_ERROR = "\u001B[31;1m"; // Bold Red
+    private static final String ANSI_WARN = "\u001B[33;1m"; // Bold Yellow
 
     private final List<PatternFormatter> formatters;
 
