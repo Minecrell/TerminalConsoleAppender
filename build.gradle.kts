@@ -2,7 +2,7 @@ plugins {
     java
     `maven-publish`
     signing
-    id("io.codearte.nexus-staging") version "0.20.0"
+    id("io.codearte.nexus-staging") version "0.21.0"
     id("net.minecrell.licenser") version "0.4.1"
 }
 
