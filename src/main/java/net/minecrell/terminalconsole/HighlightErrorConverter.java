@@ -104,20 +104,12 @@ public final class HighlightErrorConverter extends LogEventPatternConverter {
             formatters.get(i).format(event, toAppendTo);
         }
 
-        int newEnd = toAppendTo.length();
-        if (end == newEnd) {
+        if (toAppendTo.length() == end) {
             // No content so we don't need to append the ANSI escape code
             toAppendTo.setLength(start);
         } else {
-            // Insert ANSI reset before new line to prevent JLine from inserting another one
-            while (--newEnd >= 0) {
-                char c = toAppendTo.charAt(newEnd);
-                if (c != '\n' && c != '\r') {
-                    break;
-                }
-            }
-
-            toAppendTo.insert(newEnd + 1, ANSI_RESET);
+            // Append reset code after the line
+            toAppendTo.append(ANSI_RESET);
         }
     }
 
