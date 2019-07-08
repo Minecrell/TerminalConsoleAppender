@@ -21,8 +21,8 @@ dependencies {
     compile("org.apache.logging.log4j:log4j-core:2.8.1")
     annotationProcessor("org.apache.logging.log4j:log4j-core:2.8.1")
 
-    compile("org.jline:jline-reader:3.12.0")
-    runtime("org.jline:jline-terminal-jna:3.12.0")
+    compile("org.jline:jline-reader:3.12.1")
+    runtime("org.jline:jline-terminal-jna:3.12.1")
 
     compileOnly("org.checkerframework:checker-qual:2.9.0")
 
