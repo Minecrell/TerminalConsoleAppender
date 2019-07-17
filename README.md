@@ -25,8 +25,24 @@ application itself:
     net.minecrell:terminalconsoleappender:1.1.1
     ```
 
+    If you package all dependencies into a single JAR file, ensure that all transitive dependencies are included:
+
+    ```
+    org.jline:jline-terminal
+    org.jline:jline-reader
+    ```
+
     JLine 3 provides different native terminal implementations that are required for Windows support and extend the terminal
-    with some advanced features on Linux. By default, TerminalConsoleAppender depends on the JNA terminal implementation.
+    with some advanced features on Linux. You can choose between [JNA] and [Jansi]. There should be no functional difference,
+    so it is mostly a matter of preference.
+
+    For full functionality, you need to add an explicit dependency on one of the terminal implementations:
+
+    |      | [Jansi]  | [JNA]     |
+    | ---: | ------ | ------- |
+    | **Dependencies** | `org.jline:jline-terminal-jansi:3.12.1` | `org.jline:jline-terminal-jna:3.12.1` |
+    | | (`org.fusesource.jansi:jansi`) | (`net.java.dev.jna:jna`) |
+    | **Size** | ~280KB | ~1400KB |
 
 2. Configure `TerminalConsoleAppender` in your Log4j configuration:
 
@@ -37,26 +53,11 @@ application itself:
     ```
 
     The `TerminalConsole` appender replaces the regular `Console` appender in your configuration file.
-    
+
     **Note:** To avoid JLine from blocking your application in some edge cases, it is recommended that you make use of
     [Async Loggers](https://logging.apache.org/log4j/2.x/manual/async.html) or
     [Async Appenders](https://logging.apache.org/log4j/2.x/manual/appenders.html#AsyncAppender) to write messages
     asynchronously.
-
-3. That's it! To make it work at runtime you need to have the following dependencies available at runtime:
-
-    ```
-    net.minecrell:terminalconsoleappender
-    org.jline:jline-terminal
-    org.jline:jline-reader
-    ```
-
-    Unless you've chosen a different terminal implementation, you will also need:
-
-    ```
-    org.jline:jline-terminal-jna
-    net.java.dev.jna:jna
-    ```
 
 ### Console input
 The appender is designed to be used in an application with simultaneous input and output. JLine can extend your console
@@ -162,3 +163,5 @@ To use them, you need to instruct Log4j to insert them into log messages:
 
 [Log4j2 Appender]: https://logging.apache.org/log4j/2.x/manual/appenders.html
 [JLine 3 Terminal]: https://github.com/jline/jline3
+[JNA]: https://github.com/java-native-access/jna
+[Jansi]: https://github.com/fusesource/jansi
