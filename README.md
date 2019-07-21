@@ -22,7 +22,7 @@ application itself:
 1. Add a dependency on TerminalConsoleAppender:
 
     ```
-    net.minecrell:terminalconsoleappender:1.1.1
+    net.minecrell:terminalconsoleappender:1.2.0
     ```
 
     If you package all dependencies into a single JAR file, ensure that all transitive dependencies are included:
