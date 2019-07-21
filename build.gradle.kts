@@ -56,6 +56,8 @@ publishing {
 
             pom {
                 val url: String by project
+                name(project.name)
+                description(project.description!!)
                 url(url)
 
                 scm {
