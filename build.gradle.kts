@@ -25,8 +25,8 @@ dependencies {
 
     compileOnly("org.checkerframework:checker-qual:2.9.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.0")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.5.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.1")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.5.1")
 }
 
 tasks.withType<Test> {
