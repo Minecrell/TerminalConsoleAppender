@@ -62,17 +62,23 @@ public final class HighlightErrorConverter extends LogEventPatternConverter {
     private static final String ANSI_RESET = "\u001B[m";
     private static final String ANSI_ERROR = "\u001B[31;1m"; // Bold Red
     private static final String ANSI_WARN = "\u001B[33;1m"; // Bold Yellow
+    private static final String ANSI_INFO = "\u001B[32m"; // Blue
+    private static final String ANSI_DEBUG = "\u001B[36m"; // Cyan
+    private static final String ANSI_TRACE = "\u001B[30m"; // Black
 
     private final List<PatternFormatter> formatters;
+    private final boolean highlightAll;
 
     /**
      * Construct the converter.
      *
      * @param formatters The pattern formatters to generate the text to highlight
+     * @param highlightAll If all log levels should be colored
      */
-    protected HighlightErrorConverter(List<PatternFormatter> formatters) {
+    protected HighlightErrorConverter(List<PatternFormatter> formatters, boolean highlightAll) {
         super("highlightError", null);
         this.formatters = formatters;
+        this.highlightAll = highlightAll;
     }
 
     @Override
@@ -85,6 +91,17 @@ public final class HighlightErrorConverter extends LogEventPatternConverter {
             } else if (level.isMoreSpecificThan(Level.WARN)) {
                 format(ANSI_WARN, event, toAppendTo);
                 return;
+            } else if (highlightAll) {
+                if (level.isMoreSpecificThan(Level.INFO)) {
+                    format(ANSI_INFO, event, toAppendTo);
+                    return;
+                } else if (level.isMoreSpecificThan(Level.DEBUG)) {
+                    format(ANSI_DEBUG, event, toAppendTo);
+                    return;
+                } else if (level.isMoreSpecificThan(Level.TRACE)) {
+                    format(ANSI_TRACE, event, toAppendTo);
+                    return;
+                }
             }
         }
 
@@ -132,8 +149,8 @@ public final class HighlightErrorConverter extends LogEventPatternConverter {
      * @return The new instance
      */
     public static @Nullable HighlightErrorConverter newInstance(Configuration config, String[] options) {
-        if (options.length != 1) {
-            LOGGER.error("Incorrect number of options on highlightError. Expected 1 received " + options.length);
+        if (options.length != 1 && options.length != 2) {
+            LOGGER.error("Incorrect number of options on highlightError. Expected 1-2 received " + options.length);
             return null;
         }
         if (options[0] == null) {
@@ -143,7 +160,7 @@ public final class HighlightErrorConverter extends LogEventPatternConverter {
 
         PatternParser parser = PatternLayout.createPatternParser(config);
         List<PatternFormatter> formatters = parser.parse(options[0]);
-        return new HighlightErrorConverter(formatters);
+        return new HighlightErrorConverter(formatters, options.length > 1 ? Boolean.parseBoolean(options[1]) : false);
     }
 
 }
