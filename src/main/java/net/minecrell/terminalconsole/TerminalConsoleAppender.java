@@ -187,6 +187,7 @@ public final class TerminalConsoleAppender extends AbstractAppender {
      * @return true if ANSI escapes codes should be written to the console
      */
     public static boolean isAnsiSupported() {
+        initializeTerminal();
         return ANSI_OVERRIDE != null ? ANSI_OVERRIDE : terminal != null;
     }
 
@@ -205,44 +206,48 @@ public final class TerminalConsoleAppender extends AbstractAppender {
         initializeTerminal();
     }
 
-    private synchronized static void initializeTerminal() {
-        if (!initialized) {
-            initialized = true;
+    private static void initializeTerminal() {
+        if (initialized) return;
 
-            // A system property can be used to override our automatic detection
-            @Nullable Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
+        synchronized (TerminalConsoleAppender.class) {
+            if (!initialized) {
+                initialized = true;
 
-            // By default, we disable JLine if there is no terminal attached
-            // (e.g. if the program output is redirected to a file or if it's
-            // started by some kind of control panel)
+                // A system property can be used to override our automatic detection
+                @Nullable Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
 
-            // The same applies to IDEs, they usually provide only a very basic
-            // console implementation without support for ANSI escape codes
-            // (used for colors) or characters like \r.
+                // By default, we disable JLine if there is no terminal attached
+                // (e.g. if the program output is redirected to a file or if it's
+                // started by some kind of control panel)
 
-            // There are two exceptions:
-            //  1. IntelliJ IDEA supports colors and control characters
-            //     (We try to detect it using an additional JAR it adds to the classpath)
-            //  2. The system property forces the use of JLine.
-            boolean dumb = jlineOverride == Boolean.TRUE || System.getProperty("java.class.path").contains("idea_rt.jar");
+                // The same applies to IDEs, they usually provide only a very basic
+                // console implementation without support for ANSI escape codes
+                // (used for colors) or characters like \r.
 
-            if (jlineOverride != Boolean.FALSE) {
-                try {
-                    terminal = TerminalBuilder.builder().dumb(dumb).build();
-                } catch (IllegalStateException e) {
-                    // Unless disabled using one of the exceptions above,
-                    // JLine throws an exception before creating a dumb terminal
-                    // Dumb terminals are used if there is no real terminal attached
-                    // to the application.
+                // There are two exceptions:
+                //  1. IntelliJ IDEA supports colors and control characters
+                //     (We try to detect it using an additional JAR it adds to the classpath)
+                //  2. The system property forces the use of JLine.
+                boolean dumb = jlineOverride == Boolean.TRUE || System.getProperty("java.class.path").contains("idea_rt.jar");
 
-                    if (LOGGER.isDebugEnabled()) {
-                        // Log with stacktrace
-                        LOGGER.warn("Advanced terminal features are not available in this environment", e);
-                    } else {
-                        LOGGER.warn("Advanced terminal features are not available in this environment");
+                if (jlineOverride != Boolean.FALSE) {
+                    try {
+                        terminal = TerminalBuilder.builder().dumb(dumb).build();
+                    } catch (IllegalStateException e) {
+                        // Unless disabled using one of the exceptions above,
+                        // JLine throws an exception before creating a dumb terminal
+                        // Dumb terminals are used if there is no real terminal attached
+                        // to the application.
+
+                        if (LOGGER.isDebugEnabled()) {
+                            // Log with stacktrace
+                            LOGGER.warn("Advanced terminal features are not available in this environment", e);
+                        } else {
+                            LOGGER.warn("Advanced terminal features are not available in this environment");
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to initialize terminal. Falling back to standard console", e);
                     }
-                } catch (IOException e) {
-                    LOGGER.error("Failed to initialize terminal. Falling back to standard console", e);
                 }
             }
         }
