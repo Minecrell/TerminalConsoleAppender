@@ -37,7 +37,12 @@ import org.apache.logging.log4j.util.PerformanceSensitive;
 import org.apache.logging.log4j.util.PropertiesUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.awt.Color;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Replaces Minecraft formatting codes in the result of a pattern with
@@ -59,10 +64,10 @@ import java.util.List;
  * {@code %minecraftFormatting{%message}{strip}}</p>
  *
  * @see <a href="http://minecraft.gamepedia.com/Formatting_codes">
- *     Formatting Codes</a>
+ * Formatting Codes</a>
  */
 @Plugin(name = "minecraftFormatting", category = PatternConverter.CATEGORY)
-@ConverterKeys({ "minecraftFormatting" })
+@ConverterKeys({"minecraftFormatting"})
 @PerformanceSensitive("allocation")
 public final class MinecraftFormattingConverter extends LogEventPatternConverter {
 
@@ -79,36 +84,38 @@ public final class MinecraftFormattingConverter extends LogEventPatternConverter
     public static final String KEEP_FORMATTING_PROPERTY = TerminalConsoleAppender.PROPERTY_PREFIX + ".keepMinecraftFormatting";
 
     private static final boolean KEEP_FORMATTING = PropertiesUtil.getProperties().getBooleanProperty(KEEP_FORMATTING_PROPERTY);
-
-    static final String ANSI_RESET = "\u001B[m";
-
+    static final char ESC_CHAR = '\u001B';
+    static final String ANSI_RESET = ESC_CHAR + "[m";
     private static final char COLOR_CHAR = '§';
-    private static final String LOOKUP = "0123456789abcdefklmnor";
+    private static final String RGB_STRING = ESC_CHAR + "[38;2;%d;%d;%dm";
+    private static final Pattern RBG_TRANSLATE = Pattern.compile(COLOR_CHAR + "x(" + COLOR_CHAR + "[A-F0-9]){6}", Pattern.CASE_INSENSITIVE);
 
-    private static final String[] ansiCodes = new String[] {
-            "\u001B[0;30m", // Black §0
-            "\u001B[0;34m", // Dark Blue §1
-            "\u001B[0;32m", // Dark Green §2
-            "\u001B[0;36m", // Dark Aqua §3
-            "\u001B[0;31m", // Dark Red §4
-            "\u001B[0;35m", // Dark Purple §5
-            "\u001B[0;33m", // Gold §6
-            "\u001B[0;37m", // Gray §7
-            "\u001B[0;30;1m",  // Dark Gray §8
-            "\u001B[0;34;1m",  // Blue §9
-            "\u001B[0;32;1m",  // Green §a
-            "\u001B[0;36;1m",  // Aqua §b
-            "\u001B[0;31;1m",  // Red §c
-            "\u001B[0;35;1m",  // Light Purple §d
-            "\u001B[0;33;1m",  // Yellow §e
-            "\u001B[0;37;1m",  // White §f
-            "\u001B[5m",       // Obfuscated §k
-            "\u001B[21m",      // Bold §l
-            "\u001B[9m",       // Strikethrough §m
-            "\u001B[4m",       // Underline §n
-            "\u001B[3m",       // Italic §o
-            ANSI_RESET,        // Reset §r
-    };
+    private static final Map<Character, String> ansiCodes = new HashMap<>();
+
+    static {
+        ansiCodes.put('0', "\u001B[0;30m");
+        ansiCodes.put('1', "\u001B[0;34m");
+        ansiCodes.put('2', "\u001B[0;32m");
+        ansiCodes.put('3', "\u001B[0;36m");
+        ansiCodes.put('4', "\u001B[0;31m");
+        ansiCodes.put('5', "\u001B[0;35m");
+        ansiCodes.put('6', "\u001B[0;33m");
+        ansiCodes.put('7', "\u001B[0;37m");
+        ansiCodes.put('8', "\u001B[0;30;1m");
+        ansiCodes.put('9', "\u001B[0;34;1m");
+        ansiCodes.put('a', "\u001B[0;32;1m");
+        ansiCodes.put('b', "\u001B[0;36;1m");
+        ansiCodes.put('c', "\u001B[0;31;1m");
+        ansiCodes.put('d', "\u001B[0;35;1m");
+        ansiCodes.put('e', "\u001B[0;33;1m");
+        ansiCodes.put('f', "\u001B[0;37;1m");
+        ansiCodes.put('k', "\u001B[5m");
+        ansiCodes.put('l', "\u001B[21m");
+        ansiCodes.put('m', "\u001B[9m");
+        ansiCodes.put('n', "\u001B[4m");
+        ansiCodes.put('o', "\u001B[3m");
+        ansiCodes.put('r', ANSI_RESET);
+    }
 
     private final boolean ansi;
     private final List<PatternFormatter> formatters;
@@ -117,7 +124,7 @@ public final class MinecraftFormattingConverter extends LogEventPatternConverter
      * Construct the converter.
      *
      * @param formatters The pattern formatters to generate the text to manipulate
-     * @param strip If true, the converter will strip all formatting codes
+     * @param strip      If true, the converter will strip all formatting codes
      */
     protected MinecraftFormattingConverter(List<PatternFormatter> formatters, boolean strip) {
         super("minecraftFormatting", null);
@@ -139,37 +146,60 @@ public final class MinecraftFormattingConverter extends LogEventPatternConverter
         }
 
         String content = toAppendTo.substring(start);
-        format(content, toAppendTo, start, ansi && TerminalConsoleAppender.isAnsiSupported());
+        format(content, toAppendTo, ansi && TerminalConsoleAppender.isAnsiSupported());
     }
 
-    static void format(String s, StringBuilder result, int start, boolean ansi) {
-        int next = s.indexOf(COLOR_CHAR);
-        int last = s.length() - 1;
-        if (next == -1 || next == last) {
+    private static String convertRGBColors(String input) {
+        Matcher matcher = RBG_TRANSLATE.matcher(input);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            String s = matcher.group().replace(String.valueOf(COLOR_CHAR), "").replace('x', '#');
+            Color color = Color.decode(s);
+            int red = color.getRed();
+            int blue = color.getBlue();
+            int green = color.getGreen();
+            String replacement = String.format(RGB_STRING, red, green, blue);
+            matcher.appendReplacement(buffer, replacement);
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    private static String stripRGBColors(String input) {
+        Matcher matcher = RBG_TRANSLATE.matcher(input);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(buffer, "");
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    static void format(final String s, StringBuilder result, boolean ansi) {
+        String rgbString;
+        if (ansi) {
+            rgbString = convertRGBColors(s);
+        } else {
+            rgbString = stripRGBColors(s);
+        }
+        int next = rgbString.indexOf(COLOR_CHAR);
+        if (next == -1) {
+            result.delete(0, result.length());
+            result.append(rgbString);
             return;
         }
-
-        result.setLength(start + next);
-
-        int pos = next;
-        do {
-            int format = LOOKUP.indexOf(Character.toLowerCase(s.charAt(next + 1)));
-            if (format != -1) {
-                if (pos != next) {
-                    result.append(s, pos, next);
-                }
-                if (ansi) {
-                    result.append(ansiCodes[format]);
-                }
-                pos = next += 2;
+        for (char color : ansiCodes.keySet()) {
+            String cString = COLOR_CHAR + String.valueOf(color);
+            String escCode = ansiCodes.get(color);
+            if (ansi && escCode != null) {
+                rgbString = rgbString.replaceAll("(?i)" + cString, escCode);
             } else {
-                next++;
+                rgbString = rgbString.replaceAll("(?i)" + cString, "");
             }
 
-            next = s.indexOf(COLOR_CHAR, next);
-        } while (next != -1 && next < last);
-
-        result.append(s, pos, s.length());
+        }
+        result.delete(0, result.length());
+        result.append(rgbString);
         if (ansi) {
             result.append(ANSI_RESET);
         }
@@ -179,10 +209,9 @@ public final class MinecraftFormattingConverter extends LogEventPatternConverter
      * Gets a new instance of the {@link MinecraftFormattingConverter} with the
      * specified options.
      *
-     * @param config The current configuration
+     * @param config  The current configuration
      * @param options The pattern options
      * @return The new instance
-     *
      * @see MinecraftFormattingConverter
      */
     public static @Nullable MinecraftFormattingConverter newInstance(Configuration config, String[] options) {

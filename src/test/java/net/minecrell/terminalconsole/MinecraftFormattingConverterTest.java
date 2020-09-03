@@ -33,7 +33,7 @@ public class MinecraftFormattingConverterTest {
 
     private static String format(String s, boolean ansi) {
         StringBuilder result = new StringBuilder(s);
-        MinecraftFormattingConverter.format(s, result, 0, ansi);
+        MinecraftFormattingConverter.format(s, result,  ansi);
         return result.toString();
     }
 
@@ -66,6 +66,8 @@ public class MinecraftFormattingConverterTest {
                 format("§CHello §World, §6Minecrell§§c!", true));
     }
 
+
+
     @Test
     public void stripLiteral() {
         assertEquals("Hello World!", format("Hello World!", false));
@@ -91,6 +93,13 @@ public class MinecraftFormattingConverterTest {
         assertEquals("§World", format("§World", false));
         assertEquals("Hello §World!", format("§CHello §World!", false));
         assertEquals("Hello §World, Minecrell§!", format("§CHello §World, §6Minecrell§§c!", false));
+    }
+
+    @Test
+    public void testRgbColor() {
+        assertEquals("World",format("§x§F§F§0§0§5§5World",false));
+        assertEquals("\u001B[38;2;255;0;85mWorld",format("§x§F§F§0§0§5§5World",true));
+
     }
 
 }
