@@ -99,7 +99,6 @@ public class MinecraftFormattingConverterTest {
     public void testRgbColor() {
         assertEquals("World",format("§x§F§F§0§0§5§5World",false));
         assertEquals("\u001B[38;2;255;0;85mWorld",format("§x§F§F§0§0§5§5World",true));
-
     }
 
 }

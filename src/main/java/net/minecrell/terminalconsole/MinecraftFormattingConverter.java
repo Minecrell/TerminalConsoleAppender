@@ -188,10 +188,10 @@ public final class MinecraftFormattingConverter extends LogEventPatternConverter
             result.append(rgbString);
             return;
         }
-        for (char color : ansiCodes.keySet()) {
-            String cString = COLOR_CHAR + String.valueOf(color);
-            String escCode = ansiCodes.get(color);
-            if (ansi && escCode != null) {
+        for (Map.Entry<Character, String> color : ansiCodes.entrySet()) {
+            String cString = COLOR_CHAR + String.valueOf(color.getKey());
+            String escCode = color.getValue();
+            if (ansi) {
                 rgbString = rgbString.replaceAll("(?i)" + cString, escCode);
             } else {
                 rgbString = rgbString.replaceAll("(?i)" + cString, "");
