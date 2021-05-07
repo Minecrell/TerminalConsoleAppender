@@ -60,10 +60,16 @@ import java.util.List;
  *
  * @see <a href="http://minecraft.gamepedia.com/Formatting_codes">
  *     Formatting Codes</a>
+ * @deprecated Minecraft-specific. Also, legacy formatting codes are deprecated
+ *     and do not natively allow specifying RGB colors. Consider implementing
+ *     native support for the (JSON) chat components of your platform instead.
+ *     For more information, see
+ *     <a href="https://github.com/Minecrell/TerminalConsoleAppender/issues/18">issue #18</a>.
  */
 @Plugin(name = "minecraftFormatting", category = PatternConverter.CATEGORY)
 @ConverterKeys({ "minecraftFormatting" })
 @PerformanceSensitive("allocation")
+@Deprecated
 public final class MinecraftFormattingConverter extends LogEventPatternConverter {
 
     /**
