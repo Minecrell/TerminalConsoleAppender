@@ -206,48 +206,44 @@ public final class TerminalConsoleAppender extends AbstractAppender {
         initializeTerminal();
     }
 
-    private static void initializeTerminal() {
-        if (initialized) return;
+    private synchronized static void initializeTerminal() {
+        if (!initialized) {
+            initialized = true;
 
-        synchronized (TerminalConsoleAppender.class) {
-            if (!initialized) {
-                initialized = true;
+            // A system property can be used to override our automatic detection
+            @Nullable Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
 
-                // A system property can be used to override our automatic detection
-                @Nullable Boolean jlineOverride = getOptionalBooleanProperty(JLINE_OVERRIDE_PROPERTY);
+            // By default, we disable JLine if there is no terminal attached
+            // (e.g. if the program output is redirected to a file or if it's
+            // started by some kind of control panel)
 
-                // By default, we disable JLine if there is no terminal attached
-                // (e.g. if the program output is redirected to a file or if it's
-                // started by some kind of control panel)
+            // The same applies to IDEs, they usually provide only a very basic
+            // console implementation without support for ANSI escape codes
+            // (used for colors) or characters like \r.
 
-                // The same applies to IDEs, they usually provide only a very basic
-                // console implementation without support for ANSI escape codes
-                // (used for colors) or characters like \r.
+            // There are two exceptions:
+            //  1. IntelliJ IDEA supports colors and control characters
+            //     (We try to detect it using an additional JAR it adds to the classpath)
+            //  2. The system property forces the use of JLine.
+            boolean dumb = jlineOverride == Boolean.TRUE || System.getProperty("java.class.path").contains("idea_rt.jar");
 
-                // There are two exceptions:
-                //  1. IntelliJ IDEA supports colors and control characters
-                //     (We try to detect it using an additional JAR it adds to the classpath)
-                //  2. The system property forces the use of JLine.
-                boolean dumb = jlineOverride == Boolean.TRUE || System.getProperty("java.class.path").contains("idea_rt.jar");
+            if (jlineOverride != Boolean.FALSE) {
+                try {
+                    terminal = TerminalBuilder.builder().dumb(dumb).build();
+                } catch (IllegalStateException e) {
+                    // Unless disabled using one of the exceptions above,
+                    // JLine throws an exception before creating a dumb terminal
+                    // Dumb terminals are used if there is no real terminal attached
+                    // to the application.
 
-                if (jlineOverride != Boolean.FALSE) {
-                    try {
-                        terminal = TerminalBuilder.builder().dumb(dumb).build();
-                    } catch (IllegalStateException e) {
-                        // Unless disabled using one of the exceptions above,
-                        // JLine throws an exception before creating a dumb terminal
-                        // Dumb terminals are used if there is no real terminal attached
-                        // to the application.
-
-                        if (LOGGER.isDebugEnabled()) {
-                            // Log with stacktrace
-                            LOGGER.warn("Advanced terminal features are not available in this environment", e);
-                        } else {
-                            LOGGER.warn("Advanced terminal features are not available in this environment");
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to initialize terminal. Falling back to standard console", e);
+                    if (LOGGER.isDebugEnabled()) {
+                        // Log with stacktrace
+                        LOGGER.warn("Advanced terminal features are not available in this environment", e);
+                    } else {
+                        LOGGER.warn("Advanced terminal features are not available in this environment");
                     }
+                } catch (IOException e) {
+                    LOGGER.error("Failed to initialize terminal. Falling back to standard console", e);
                 }
             }
         }
