@@ -187,7 +187,8 @@ public final class TerminalConsoleAppender extends AbstractAppender {
      * @return true if ANSI escapes codes should be written to the console
      */
     public static boolean isAnsiSupported() {
-        initializeTerminal();
+        if (!initialized)
+            initializeTerminal();
         return ANSI_OVERRIDE != null ? ANSI_OVERRIDE : terminal != null;
     }
 
@@ -203,7 +204,8 @@ public final class TerminalConsoleAppender extends AbstractAppender {
      */
     protected TerminalConsoleAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions);
-        initializeTerminal();
+        if (!initialized)
+            initializeTerminal();
     }
 
     private synchronized static void initializeTerminal() {
