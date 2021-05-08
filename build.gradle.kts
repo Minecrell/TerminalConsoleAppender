@@ -23,10 +23,10 @@ dependencies {
 
     api("org.jline:jline-reader:3.12.1")
 
-    compileOnly("org.checkerframework:checker-qual:2.9.0")
+    compileOnly("org.checkerframework:checker-qual:3.13.0")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.1")
 }
 
 java {
