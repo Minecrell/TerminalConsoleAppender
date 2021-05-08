@@ -21,7 +21,7 @@ dependencies {
     api("org.apache.logging.log4j:log4j-core:2.8.1")
     annotationProcessor("org.apache.logging.log4j:log4j-core:2.8.1")
 
-    api("org.jline:jline-reader:3.12.1")
+    api("org.jline:jline-reader:3.20.0")
 
     compileOnly("org.checkerframework:checker-qual:3.13.0")
 
