@@ -187,6 +187,7 @@ public final class TerminalConsoleAppender extends AbstractAppender {
      * @return true if ANSI escapes codes should be written to the console
      */
     public static boolean isAnsiSupported() {
+        initializeTerminal();
         return ANSI_OVERRIDE != null ? ANSI_OVERRIDE : terminal != null;
     }
 

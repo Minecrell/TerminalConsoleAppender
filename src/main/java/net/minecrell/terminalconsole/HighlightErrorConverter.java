@@ -42,7 +42,7 @@ import java.util.List;
 
 /**
  * A simplified version of {@link HighlightConverter} that uses
- * {@link TerminalConsoleAppender} to detect if Ansi escape codes can be used
+ * {@link TerminalConsoleAppender} to detect if ANSI escape codes can be used
  * to highlight errors and warnings in the console.
  *
  * <p>If configured, it will mark all logged errors with a red color and all
