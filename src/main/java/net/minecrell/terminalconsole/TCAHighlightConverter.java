@@ -24,19 +24,15 @@
 
 package net.minecrell.terminalconsole;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.pattern.ConverterKeys;
 import org.apache.logging.log4j.core.pattern.HighlightConverter;
 import org.apache.logging.log4j.core.pattern.PatternConverter;
-import org.apache.logging.log4j.status.StatusLogger;
 import org.apache.logging.log4j.util.PerformanceSensitive;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A wrapped version of {@link HighlightConverter} that uses
@@ -55,8 +51,7 @@ import java.util.List;
 @Plugin(name = "highlightTCA", category = PatternConverter.CATEGORY)
 @ConverterKeys({ "highlightTCA" })
 @PerformanceSensitive("allocation")
-public class TCAHighlightConverter {
-    protected static final Logger LOGGER = StatusLogger.getLogger();
+public final class TCAHighlightConverter {
 
     /**
      * Gets a new instance of the {@link HighlightConverter} with the
@@ -69,11 +64,10 @@ public class TCAHighlightConverter {
      * @return The new instance
      */
     public static @Nullable HighlightConverter newInstance(Configuration config, String[] options) {
-
         if (!TerminalConsoleAppender.isAnsiSupported()) {
-            List<String> optionList = new ArrayList<>(Arrays.asList(options));
-            optionList.add("disableAnsi=true");
-            options = optionList.toArray(new String[0]);
+            int len = options.length;
+            options = Arrays.copyOf(options, len + 1);
+            options[len] = "disableAnsi=true";
         }
         return HighlightConverter.newInstance(config, options);
     }
