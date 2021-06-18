@@ -34,6 +34,12 @@ java {
     withJavadocJar()
 }
 
+tasks.jar {
+    manifest {
+        attributes("Automatic-Module-Name" to "net.minecrell.terminalconsole")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
