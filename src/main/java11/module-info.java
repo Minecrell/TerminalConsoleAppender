@@ -23,12 +23,12 @@
  */
 
 module net.minecrell.terminalconsole {
-    exports net.minecrell.terminalconsole;
-    exports net.minecrell.terminalconsole.util;
-
+    requires org.apache.logging.log4j;
     requires transitive org.apache.logging.log4j.core;
     requires static org.checkerframework.checker.qual;
     requires transitive org.jline.terminal;
     requires transitive org.jline.reader;
-    requires org.apache.logging.log4j;
+
+    exports net.minecrell.terminalconsole;
+    exports net.minecrell.terminalconsole.util;
 }
