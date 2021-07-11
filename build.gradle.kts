@@ -14,6 +14,9 @@ sourceSets.create("java11") {
     java.srcDir("src/main/java")
 }
 
+sourceSets.create("intTest") {
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
@@ -60,9 +63,21 @@ tasks.named<JavaCompile>("compileJava11Java") {
     classpath = classpath.plus(sourceSets["main"].compileClasspath)
 }
 
+tasks.named<JavaCompile>("compileIntTestJava") {
+    options.release.set(11)
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+val compileIntTestTask = tasks.named<JavaCompile>("compileIntTestJava") {
+    val jarTask = tasks.named<Jar>("jar").get()
+    dependsOn(jarTask)
+    val mainJar = jarTask.archiveFile.get()
+    classpath = sourceSets["main"].runtimeClasspath.plus(files(mainJar))
+}
+tasks.build { dependsOn(compileIntTestTask) }
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 
