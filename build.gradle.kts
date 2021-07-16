@@ -14,8 +14,10 @@ sourceSets.create("java11") {
     java.srcDir("src/main/java")
 }
 
-sourceSets.create("intTest") {
-}
+sourceSets.create("intTest")
+
+configurations["java11CompileClasspath"].extendsFrom(configurations.compileClasspath.get())
+configurations["intTestImplementation"].extendsFrom(configurations.api.get())
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -35,6 +37,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    "intTestImplementation"(files(tasks.named<Jar>("jar").get().archiveFile))
 }
 
 java {
@@ -60,7 +63,6 @@ tasks.named<JavaCompile>("compileJava") {
 tasks.named<JavaCompile>("compileJava11Java") {
     options.release.set(11)
     options.javaModuleVersion.set(project.version as String)
-    classpath = classpath.plus(sourceSets["main"].compileClasspath)
 }
 
 tasks.named<JavaCompile>("compileIntTestJava") {
@@ -71,13 +73,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val compileIntTestTask = tasks.named<JavaCompile>("compileIntTestJava") {
-    val jarTask = tasks.named<Jar>("jar").get()
-    dependsOn(jarTask)
-    val mainJar = jarTask.archiveFile.get()
-    classpath = sourceSets["main"].runtimeClasspath.plus(files(mainJar))
-}
-tasks.build { dependsOn(compileIntTestTask) }
+val compileIntTestTask = tasks.named<JavaCompile>("compileIntTestJava").get()
+tasks.check { dependsOn(compileIntTestTask) }
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 

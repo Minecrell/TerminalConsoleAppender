@@ -29,7 +29,7 @@ import net.minecrell.terminalconsole.TerminalConsoleAppender;
 
 public class Compilation {
 
-  public void useTCA(TerminalConsoleAppender tca) {
-    tca.append((LogEvent) null);    
-  }
+    public void useTCA(TerminalConsoleAppender tca) {
+        tca.append((LogEvent) null);    
+    }
 }
