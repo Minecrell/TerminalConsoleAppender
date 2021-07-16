@@ -73,8 +73,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val compileIntTestTask = tasks.named<JavaCompile>("compileIntTestJava").get()
-tasks.check { dependsOn(compileIntTestTask) }
+tasks.check { dependsOn(tasks.named("compileIntTestJava")) }
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 

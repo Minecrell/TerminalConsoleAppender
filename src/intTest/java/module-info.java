@@ -23,5 +23,5 @@
  */
 
 module net.minecrell.terminalconsole.it {
-  requires net.minecrell.terminalconsole;
+    requires net.minecrell.terminalconsole;
 }
