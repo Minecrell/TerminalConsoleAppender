@@ -22,7 +22,7 @@ application itself:
 1. Add a dependency on TerminalConsoleAppender:
 
     ```
-    net.minecrell:terminalconsoleappender:1.2.0
+    net.minecrell:terminalconsoleappender:1.3.0
     ```
 
     If you package all dependencies into a single JAR file, ensure that all transitive dependencies are included:
@@ -40,7 +40,7 @@ application itself:
 
     |      | [Jansi]  | [JNA]     |
     | ---: | ------ | ------- |
-    | **Dependencies** | `org.jline:jline-terminal-jansi:3.12.1` | `org.jline:jline-terminal-jna:3.12.1` |
+    | **Dependencies** | `org.jline:jline-terminal-jansi:3.20.0` | `org.jline:jline-terminal-jna:3.20.0` |
     | | (`org.fusesource.jansi:jansi`) | (`net.java.dev.jna:jna`) |
     | **Size** | ~280KB | ~1400KB |
 
@@ -122,12 +122,13 @@ JLine will automatically render ANSI color escape codes in supported terminals u
 To use them, you need to instruct Log4j to insert them into log messages:
 
 - You can use the [patterns included in Log4j](https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns)
-  in your `PatternLayout`, e.g. `%highlight` or `%style`. It is recommended to use the `noConsoleNoAnsi` option for
-  `PatternLayout` to omit them in unsupported environments:
+  in your `PatternLayout`, e.g. `%highlight` or `%style`. It is recommended to use the `disableAnsi` option
+  together with the `${tca:disableAnsi}` variable. This will ensure that ANSI colors are disabled automatically in
+  unsupported environments or with the system properties mentioned above:
 
   ```xml
   <TerminalConsole>
-      <PatternLayout noConsoleNoAnsi="true" pattern="%highlight{[%d{HH:mm:ss} %level]: %msg%n%xEx}"/>
+      <PatternLayout pattern="%highlight{[%d{HH:mm:ss} %level]: %msg%n%xEx}" disableAnsi="${tca:disableAnsi}"/>
   </TerminalConsole>
   ```
 
@@ -160,6 +161,10 @@ To use them, you need to instruct Log4j to insert them into log messages:
       <PatternLayout pattern="[%d{HH:mm:ss} %level]: %minecraftFormatting{%msg}{strip}%n"/>
   </TerminalConsole>
   ```
+  
+  **NOTE:** The MinecraftFormattingConverter is deprecated and may be removed in future versions of
+  TerminalConsoleAppender. There are no plans to extend it with new features like RGB color codes.
+  Please see [issue #18](https://github.com/Minecrell/TerminalConsoleAppender/issues/18) for details.
 
 [Log4j2 Appender]: https://logging.apache.org/log4j/2.x/manual/appenders.html
 [JLine 3 Terminal]: https://github.com/jline/jline3
