@@ -8,6 +8,16 @@ plugins {
 
 base.archivesName(project.name.toLowerCase())
 
+sourceSets.create("java11") {
+    java.srcDir("src/main/java11")
+    java.srcDir("src/main/java")
+}
+
+sourceSets.create("intTest")
+
+configurations["java11CompileClasspath"].extendsFrom(configurations.compileClasspath.get())
+configurations["intTestImplementation"].extendsFrom(configurations.api.get())
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
@@ -17,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    api("org.apache.logging.log4j:log4j-core:2.8.1")
-    annotationProcessor("org.apache.logging.log4j:log4j-core:2.8.1")
+    api("org.apache.logging.log4j:log4j-core:2.14.1")
+    annotationProcessor("org.apache.logging.log4j:log4j-core:2.14.1")
 
     api("org.jline:jline-reader:3.20.0")
 
@@ -26,6 +36,7 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    "intTestImplementation"(files(tasks.named("jar")))
 }
 
 java {
@@ -36,12 +47,32 @@ java {
 tasks.jar {
     manifest {
         attributes("Automatic-Module-Name" to "net.minecrell.terminalconsole")
+        attributes("Multi-Release" to "true")
     }
+    into("META-INF/versions/11") {
+        from(sourceSets["java11"].output)
+        include("module-info.class")
+    }
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    options.release.set(8)
+}
+
+tasks.named<JavaCompile>("compileJava11Java") {
+    options.release.set(11)
+    options.javaModuleVersion.set(project.version as String)
+}
+
+tasks.named<JavaCompile>("compileIntTestJava") {
+    options.release.set(11)
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.check { dependsOn(tasks.named("compileIntTestJava")) }
 
 val isSnapshot = version.toString().endsWith("-SNAPSHOT")
 
