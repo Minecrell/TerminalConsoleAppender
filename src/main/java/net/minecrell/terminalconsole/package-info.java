@@ -22,5 +22,8 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Main package of TerminalConsoleAppender.
+ */
 @org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
 package net.minecrell.terminalconsole;

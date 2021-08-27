@@ -30,12 +30,9 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
-import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
-import org.apache.logging.log4j.core.config.plugins.PluginElement;
-import org.apache.logging.log4j.core.config.plugins.PluginFactory;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 import org.apache.logging.log4j.util.PropertiesUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.LineReader;
@@ -90,6 +87,9 @@ import java.io.Serializable;
 @Plugin(name = TerminalConsoleAppender.PLUGIN_NAME, category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE, printObject = true)
 public final class TerminalConsoleAppender extends AbstractAppender {
 
+    /**
+     * The name of the appender in the configuration.
+     */
     public static final String PLUGIN_NAME = "TerminalConsole";
 
     /**
@@ -201,9 +201,11 @@ public final class TerminalConsoleAppender extends AbstractAppender {
      * @param ignoreExceptions If {@code true} exceptions encountered when
      *     appending events are logged, otherwise they are propagated to the
      *     caller
+     * @param properties Optional properties
      */
-    protected TerminalConsoleAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
-        super(name, filter, layout, ignoreExceptions);
+    protected TerminalConsoleAppender(String name, Filter filter, Layout<? extends Serializable> layout,
+            boolean ignoreExceptions, Property[] properties) {
+        super(name, filter, layout, ignoreExceptions, properties);
         if (!initialized)
             initializeTerminal();
     }
@@ -291,28 +293,29 @@ public final class TerminalConsoleAppender extends AbstractAppender {
     }
 
     /**
-     * Creates a new {@link TerminalConsoleAppender}.
+     * Creates a new {@link Builder} for {@link TerminalConsoleAppender}.
      *
-     * @param name The name of the appender
-     * @param filter The filter, can be {@code null}
-     * @param layout The layout, can be {@code null}
-     * @param ignoreExceptions If {@code true} exceptions encountered when
-     *     appending events are logged, otherwise they are propagated to the
-     *     caller
-     * @return The new appender
+     * @param <B> The type to build
+     * @return The new builder
      */
-    @PluginFactory
-    public static TerminalConsoleAppender createAppender(
-            @Required(message = "No name provided for TerminalConsoleAppender") @PluginAttribute("name") String name,
-            @PluginElement("Filter") Filter filter,
-            @PluginElement("Layout") @Nullable Layout<? extends Serializable> layout,
-            @PluginAttribute(value = "ignoreExceptions", defaultBoolean = true) boolean ignoreExceptions) {
+    @PluginBuilderFactory
+    public static <B extends Builder<B>> B newBuilder() {
+        return new Builder<B>().asBuilder();
+    }
 
-        if (layout == null) {
-            layout = PatternLayout.createDefaultLayout();
+    /**
+     * Builds {@link TerminalConsoleAppender} instances.
+     *
+     * @param <B> The type to build
+     */
+    public static class Builder<B extends Builder<B>> extends AbstractAppender.Builder<B>
+            implements org.apache.logging.log4j.core.util.Builder<TerminalConsoleAppender> {
+
+        @Override
+        public TerminalConsoleAppender build() {
+            return new TerminalConsoleAppender(getName(), getFilter(), getOrCreateLayout(),
+                    isIgnoreExceptions(), getPropertyArray());
         }
-
-        return new TerminalConsoleAppender(name, filter, layout, ignoreExceptions);
     }
 
     private static @Nullable Boolean getOptionalBooleanProperty(String name) {

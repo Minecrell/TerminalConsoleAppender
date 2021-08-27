@@ -22,5 +22,10 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Contains some extra utilities that are not strictly related to
+ * TerminalConsoleAppender. Should be moved to a separate project
+ * or submitted upstream into Log4j most likely.
+ */
 @org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
 package net.minecrell.terminalconsole.util;
