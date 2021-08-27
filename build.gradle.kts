@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
     signing
     id("io.codearte.nexus-staging") version "0.30.0"
-    id("org.cadixdev.licenser") version "0.6.0"
+    id("org.cadixdev.licenser") version "0.6.1"
 }
 
 val artifactId = project.name.toLowerCase()
