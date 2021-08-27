@@ -6,8 +6,7 @@ plugins {
     id("org.cadixdev.licenser") version "0.6.1"
 }
 
-val artifactId = project.name.toLowerCase()
-base.archivesBaseName = artifactId
+base.archivesName(project.name.toLowerCase())
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -50,7 +49,7 @@ publishing {
     publications {
         register<MavenPublication>("mavenJava") {
             from(components["java"])
-            artifactId = base.archivesBaseName
+            artifactId = project.name.toLowerCase()
 
             pom {
                 val url: String by project
